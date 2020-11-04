@@ -65,7 +65,13 @@ __attribute__((annotate("returns_localized_nsstring"))) static inline NSString *
     for (NSURLQueryItem *item in components.queryItems) {
         if ([item.name isEqualToString:@"WMFArticleURL"]) {
             NSString *articleURLString = item.value;
-            articleURL = [NSURL URLWithString:articleURLString];
+            NSURL *urlCandidate = [NSURL URLWithString:articleURLString];
+            // pre-validate `articleURLString` here because strings like @"garbage" surprisingly return a non-nil
+            // NSURL instance with the description @"garbage", but this causes a crash in UAUserActivity(Internal):
+            //
+            // *** Terminating app due to uncaught exception 'NSInvalidArgumentException',
+            // reason: 'NSUserActivity.webpageURL scheme "(null)" is not allowed.'
+            articleURL = ([urlCandidate scheme] && [urlCandidate host]) ? urlCandidate : nil;
             break;
         }
     }

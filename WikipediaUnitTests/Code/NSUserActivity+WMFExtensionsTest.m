@@ -52,5 +52,19 @@
                           @"https://en.wikipedia.org/w/index.php?search=dog&title=Special:Search&fulltext=1");
 }
 
+- (void)testPlacesGarbageURL {
+    NSURL *url = [NSURL URLWithString:@"wikipedia://places?WMFArticleURL=garbage"];
+    NSUserActivity *activity = [NSUserActivity wmf_activityForWikipediaScheme:url];
+    XCTAssertEqual(activity.wmf_type, WMFUserActivityTypePlaces);
+    XCTAssertNil(activity.wmf_linkURL);
+}
+
+- (void)testPlacesValidURL {
+    NSURL *url = [NSURL URLWithString:@"wikipedia://places?WMFArticleURL=https://www.google.com"];
+    NSUserActivity *activity = [NSUserActivity wmf_activityForWikipediaScheme:url];
+    XCTAssertEqual(activity.wmf_type, WMFUserActivityTypePlaces);
+    XCTAssertEqualObjects(activity.wmf_linkURL.absoluteString, @"https://www.google.com");
+}
+
 @end
 
